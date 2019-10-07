@@ -1,0 +1,44 @@
+{
+  "name": "genetic_tsp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "jungdj <jung_dj@kaist.ac.kr>",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "dependencies": {
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-proposal-export-namespace-from": "^7.5.2",
+    "@babel/polyfill": "^7.4.4",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/register": "^7.5.5",
+    "bignumber.js": "^9.0.0",
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/node": "^7.5.5",
+    "babel-eslint": "10.0.2",
+    "eslint": "^6.2.2",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "ecmaVersion": 2018,
+      "sourceType": "module"
+    },
+    "extends": "airbnb-base",
+    "env": {
+      "browser": false,
+      "node": true,
+      "mocha": true
+    },
+    "globals": {
+      "jQuery": true,
+      "$": true
+    }
+  }
+}
