@@ -1,46 +1,37 @@
-import fs from 'fs';
-import path from 'path';
+import _ from 'lodash';
+import { getAndParseData, randPerm, shuffle } from './utils';
 
-const testdataList = [
-  'a280',
-  'ali535',
-  'att48',
-];
+const main = (name, population = 1000, generation = 1000) => {
+  const { length, distance, distances } = getAndParseData(name);
+  const list = [...Array(length - 1)].map((x, i) => i + 2);
+  let creatures = [...Array(population)].map(() => [1, ...randPerm(list)]);
 
-const resolvePath = (file) => path.resolve(__dirname, `../testdata/${file}.tsp`);
-const testdataFilesArray = testdataList.map(resolvePath);
-const testdataFiles = testdataList.reduce((acc, cur) => ({ ...acc, [cur]: resolvePath(cur) }), {});
-
-const getAndParseData = (name) => {
-  const fileLoc = testdataFiles[name];
-  const testdata = fs.readFileSync(fileLoc, 'utf8');
-  const lines = testdata.split('\n');
-  const from = lines.findIndex((line) => line === 'NODE_COORD_SECTION');
-  let data = lines.slice(from + 1, -2);
-  data = data.map((x) => x.trim());
-  data = data.map((x) => x.split(' '));
-  data = data.map((x) => x = x.filter((x) => !!x));
-
-  const distances = {};
-
-  const euclideanDistance = (a, b) => {
-    const low = Math.min(a, b);
-    const high = Math.max(a, b);
-    const edge = `${low}-${high}`;
-    return distances[edge] || (() => {
-      const [, x1, y1] = data[low - 1];
-      const [, x2, y2] = data[high - 1];
-      const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-      distances[edge] = distance;
-      return distance;
-    })();
+  const fitnessFunc = (creature) => {
+  	const dup = creature.slice(0, creature.length - 1); // Cut last element to reduce redundant last check
+    return dup.reduce((acc, cur, i) => acc + distance(cur, creature[i + 1]), distance(creature[0], creature[creature.length - 1]));
   };
 
-  return { l: data.length, d: euclideanDistance };
-};
+  const nextGeneration = () => {
+    const fitnesses = creatures.map((creature, i) => ({
+      fitness: fitnessFunc(creature),
+      index: i,
+    }));
 
-const main = (name) => {
-  const { l, d } = getAndParseData(name);
+    const sorted = _.sortBy(fitnesses, 'fitness');
+    console.log('Best 5', sorted.slice(0, 5));
+    const best = sorted.slice(0, 300).map(({ index }) => creatures[index]);
+    const bestPerm = best.map((best) => shuffle(best, 2));
+    const newCreatures = [...Array(200)].map(() => [1, ...randPerm(list)]);
+    const worst = sorted.slice(790, 200).map(({ index }) => creatures[index]);
+
+    return [...best, ...bestPerm, ...newCreatures, ...worst];
+  };
+
+
+  while (generation != 0) {
+  	creatures = nextGeneration();
+    generation--;
+  }
 };
 
 main('a280');
