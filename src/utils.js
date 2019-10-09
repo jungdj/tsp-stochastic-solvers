@@ -3,13 +3,29 @@ import path from 'path';
 
 const testdataList = [
   'a280',
+  'st70',
+  'my5',
   'ali535',
   'att48',
+  'rl11849',
 ];
 
 const resolvePath = (file) => path.resolve(__dirname, `../testdata/${file}.tsp`);
+const resolveSolPath = (file) => path.resolve(__dirname, `../solution/${file}.tour`);
+export const trainedDataPath = (name) => path.resolve(__dirname, `../trained/${name}-pheromone.json`);
 const testdataFilesArray = testdataList.map(resolvePath);
-const testdataFiles = testdataList.reduce((acc, cur) => ({ ...acc, [cur]: resolvePath(cur) }), {});
+export const testdataFiles = testdataList.reduce((acc, cur) => ({ ...acc, [cur]: resolvePath(cur) }), {});
+const resultFiles = testdataList.reduce((acc, cur) => ({ ...acc, [cur]: resolveSolPath(cur) }), {});
+
+
+export const testdataQs = {
+	my5: 16,
+  st70: 675,
+  a280: 2579,
+  ali535: 202310,
+  att48: 10628,
+  rl11849: 920847,
+};
 
 export const getAndParseData = (name) => {
   const fileLoc = testdataFiles[name];

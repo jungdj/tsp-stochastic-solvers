@@ -64,3 +64,5 @@ typings/
 
 # editor
 .idea/
+
+trained/
