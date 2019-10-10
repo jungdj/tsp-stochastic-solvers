@@ -53,13 +53,14 @@ class World {
 	  logger.complete('saveTrained() - Data saved');
 	}
 
-	constructor(name, alpha = 1, beta = 1) {
+	constructor(name, alpha = 1.5, beta = 1, evaporation = 0.2) {
 	  logger.start('constructor()');
 	  this.name = name;
 	  const fileLoc = testdataFiles[name];
-	  this.Q = testdataQs[name] / 10;
+	  this.Q = testdataQs[name];
 	  this.alpha = alpha;
 	  this.beta = beta;
+	  this.evaporation = evaporation;
 
 	  if (this.loadPretrained()) {
 	  	logger.santa('Loaded pretrained data!');
@@ -128,7 +129,7 @@ class World {
 	  }
 	  const startKey = Math.min(start, end);
 	  const endKey = Math.max(start, end);
-	  //console.log(start, end, update(this.getEdge(startKey, endKey)));
+	  // console.log(start, end, update(this.getEdge(startKey, endKey)));
 	  this.edges[`${startKey}-${endKey}`] = update(this.getEdge(startKey, endKey));
 	}
 
@@ -171,12 +172,12 @@ class World {
 	  		break;
 	    }
 	  	const priority = (pheromone ** this.alpha) * ((1 / distance) ** this.beta);
-	  	  //console.log(
+	  	  // console.log(
 	    	// accPriorities[accPriorities.length - 1],
 	    	// accPriorities.length,
 	    	// (accPriorities.length ? accPriorities[accPriorities.length - 1] : 0),
 	    	// priority,
-	      //);
+	      // );
 	    accPriorities.push(
 	      (accPriorities.length ? accPriorities[accPriorities.length - 1] : 0) + priority,
 	    );
@@ -204,6 +205,24 @@ class World {
 	  ant.location = next;
 	}
 
+	travel = (ant) => {
+	  for (let i = 1; i < this.dataLength; i++) {
+	    this.forward(ant);
+	  }
+	  this.endTravel(ant);
+	}
+
+	evaporate = () => {
+	  for (let cur = 1; cur <= this.dataLength; cur++) {
+	    for (let dest = cur + 1; dest <= this.dataLength; dest++) {
+	      this.setEdge(cur, dest, edge => ({
+	        ...edge,
+	        pheromone: edge.pheromone * (1 - this.evaporation),
+	      }));
+	    }
+	  }
+	}
+
 	retrace = (ant) => {
 	  const { Q } = this;
 	  const { length, path } = ant;
@@ -212,20 +231,14 @@ class World {
 	  	const cur = path[i];
 	  	const next = path[i + 1];
 
-	  	const newPheromone = Q / length;
+	  	const newPheromone = (Q / length) ** 2; // Enlarge exploration force
 
 	  	this.setEdge(cur, next, edge => ({
 	  			...edge,
 	      pheromone: edge.pheromone + newPheromone,
 	    }));
+	  	//console.log(this.getEdge(cur, next));
 	  }
-	}
-
-	travel = (ant) => {
-	  for (let i = 1; i < this.dataLength; i++) {
-	    this.forward(ant);
-	  }
-	  this.endTravel(ant);
 	}
 
 	next = () => {
@@ -236,6 +249,9 @@ class World {
 	  	this.travel(ant);
 	  }
 	  logger.complete('next() - complete travel');
+	  logger.start('next() - evaporate');
+	  this.evaporate();
+	  logger.complete('next() - evaporate');
 	  logger.start('next() - start retrace');
 	  for (const ant of this.ants) {
 	    this.retrace(ant);
@@ -252,7 +268,6 @@ class World {
 	  const rankedLength = rankers.map(ranker => ranker.length);
 	  logger.santa('Congrats!\n', rankers.map(x => JSON.stringify(x)));
 	  logger.santa('Congrats!\n', rankedLength);
-	  console.log('Congrats!\n', rankedLength);
 	}
 
 	colonize = () => {
@@ -266,7 +281,7 @@ class World {
 
 	genesis = (endOfWorld = 100000, numAnts = 100) => {
 	  this.numAnts = numAnts;
-	  //setInterval(this.colonize, 1000)
+	  // setInterval(this.colonize, 1000)
 	  for (let i = 0; i < endOfWorld; i++) {
 	    this.colonize();
 	  }

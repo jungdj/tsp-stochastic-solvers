@@ -19,7 +19,7 @@ const resultFiles = testdataList.reduce((acc, cur) => ({ ...acc, [cur]: resolveS
 
 
 export const testdataQs = {
-	my5: 16,
+  my5: 16,
   st70: 675,
   a280: 2579,
   ali535: 202310,
